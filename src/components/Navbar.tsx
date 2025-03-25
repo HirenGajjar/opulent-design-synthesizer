@@ -1,11 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, ShoppingCart, User } from 'lucide-react';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +20,11 @@ export function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  // Close menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location]);
   
   return (
     <>
@@ -78,14 +84,24 @@ export function Navbar() {
           <div className="flex-1 flex items-center justify-center">
             <nav className="text-center">
               <ul className="space-y-8">
-                {['Home', 'Collections', 'Furniture', 'Decor', 'Lighting', 'Bespoke', 'About', 'Contact'].map((item) => (
-                  <li key={item} className="overflow-hidden py-2">
+                {[
+                  { name: 'Home', path: '/' },
+                  { name: 'Collections', path: '/collections' },
+                  { name: 'Furniture', path: '/furniture' },
+                  { name: 'Decor', path: '/decor' },
+                  { name: 'Lighting', path: '/lighting' },
+                  { name: 'Bespoke', path: '/bespoke' },
+                  { name: 'About', path: '/about' },
+                  { name: 'Contact', path: '/contact' }
+                ].map((item) => (
+                  <li key={item.name} className="overflow-hidden py-2">
                     <Link 
-                      to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
-                      className="text-4xl md:text-5xl lg:text-6xl font-serif text-white hover:text-mercana-gold transition-colors duration-300 cursor-pointer"
-                      onClick={() => setIsMenuOpen(false)}
+                      to={item.path}
+                      className={`text-4xl md:text-5xl lg:text-6xl font-serif hover:text-mercana-gold transition-colors duration-300 cursor-pointer ${
+                        location.pathname === item.path ? 'text-mercana-gold' : 'text-white'
+                      }`}
                     >
-                      {item}
+                      {item.name}
                     </Link>
                   </li>
                 ))}
