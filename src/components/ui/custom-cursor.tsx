@@ -6,6 +6,7 @@ export function CustomCursor() {
   const [clicked, setClicked] = useState(false);
   const [linkHovered, setLinkHovered] = useState(false);
   const [hidden, setHidden] = useState(true);
+  const [cursorType, setCursorType] = useState('default');
 
   useEffect(() => {
     const updatePosition = (e: MouseEvent) => {
@@ -16,8 +17,20 @@ export function CustomCursor() {
     const handleMouseDown = () => setClicked(true);
     const handleMouseUp = () => setClicked(false);
 
-    const handleLinkHover = () => setLinkHovered(true);
-    const handleLinkLeave = () => setLinkHovered(false);
+    const handleLinkHover = (e: Event) => {
+      setLinkHovered(true);
+      
+      // Extract data attributes to determine cursor behavior
+      const target = e.currentTarget as HTMLElement;
+      if (target.dataset.cursor) {
+        setCursorType(target.dataset.cursor);
+      }
+    };
+    
+    const handleLinkLeave = () => {
+      setLinkHovered(false);
+      setCursorType('default');
+    };
 
     const addLinkEvents = () => {
       const links = document.querySelectorAll('a, button, [role="button"], .cursor-pointer');
@@ -65,16 +78,38 @@ export function CustomCursor() {
       observer.disconnect();
     };
   }, []);
+  
+  const getCursorClasses = () => {
+    let classes = 'mercana-cursor';
+    
+    if (clicked) classes += ' scale-75';
+    if (linkHovered) classes += ' scale-150';
+    if (hidden) classes += ' opacity-0';
+    else classes += ' opacity-100';
+    
+    // Add specific cursor types
+    if (cursorType === 'expand') classes += ' scale-[2]';
+    if (cursorType === 'video') classes += ' scale-[1.8] border-white';
+    
+    return classes;
+  };
 
   return (
     <>
       <div
-        className={`mercana-cursor ${clicked ? 'scale-75' : ''} ${linkHovered ? 'scale-150' : ''} ${hidden ? 'opacity-0' : 'opacity-100'}`}
-        style={{ left: `${position.x}px`, top: `${position.y}px` }}
+        className={getCursorClasses()}
+        style={{ 
+          left: `${position.x}px`, 
+          top: `${position.y}px`,
+          transition: linkHovered ? 'transform 0.3s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s ease, border 0.3s ease' : 'transform 0.15s ease, opacity 0.3s ease'
+        }}
       />
       <div
         className={`mercana-cursor-dot ${hidden ? 'opacity-0' : 'opacity-100'} ${linkHovered ? 'opacity-0' : 'opacity-100'}`}
-        style={{ left: `${position.x}px`, top: `${position.y}px` }}
+        style={{ 
+          left: `${position.x}px`, 
+          top: `${position.y}px` 
+        }}
       />
     </>
   );
